@@ -1,6 +1,6 @@
 Name:             snappy-java
 Version:          1.0.4.1
-Release:          3%{?dist}
+Release:          4%{?dist}
 Summary:          Fast compressor/decompresser
 Group:            Development/Libraries
 License:          ASL 2.0
@@ -18,7 +18,7 @@ BuildRequires:    felix-osgi-core
 BuildRequires:    java-devel
 BuildRequires:    jboss-logging
 BuildRequires:    jpackage-utils
-BuildRequires:    maven
+BuildRequires:    maven-local
 BuildRequires:    maven-compiler-plugin
 BuildRequires:    maven-install-plugin
 BuildRequires:    maven-jar-plugin
@@ -77,6 +77,10 @@ cp -rp target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 %doc LICENSE
 
 %changelog
+* Wed Feb 06 2013 Java SIG <java-devel@lists.fedoraproject.org> - 1.0.4.1-4
+- Update for https://fedoraproject.org/wiki/Fedora_19_Maven_Rebuild
+- Replace maven BuildRequires with maven-local
+
 * Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.4.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
