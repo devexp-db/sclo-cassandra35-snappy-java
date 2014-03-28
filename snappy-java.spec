@@ -1,6 +1,6 @@
 Name:             snappy-java
 Version:          1.0.4.1
-Release:          6%{?dist}
+Release:          7%{?dist}
 Summary:          Fast compressor/decompresser
 Group:            Development/Libraries
 License:          ASL 2.0
@@ -25,7 +25,6 @@ BuildRequires:    maven-jar-plugin
 BuildRequires:    maven-javadoc-plugin
 
 Requires:         felix-osgi-core
-Requires:         java
 Requires:         jboss-logging
 Requires:         jpackage-utils
 
@@ -77,6 +76,9 @@ cp -rp target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 %doc LICENSE
 
 %changelog
+* Fri Mar 28 2014 Michael Simacek <msimacek@redhat.com> - 1.0.4.1-7
+- Use Requires: java-headless rebuild (#1067528)
+
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.4.1-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
