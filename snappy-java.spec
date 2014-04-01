@@ -16,6 +16,8 @@ BuildRequires:    java-devel
 BuildRequires:    maven-local
 BuildRequires:    mvn(org.apache.felix:org.osgi.core)
 
+Requires:         java-headless
+
 %description
 A Java port of the snappy, a fast compresser/decompresser written in C++.
 
