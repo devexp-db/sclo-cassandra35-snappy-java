@@ -1,6 +1,6 @@
 Name:             snappy-java
 Version:          1.0.4.1
-Release:          7%{?dist}
+Release:          8%{?dist}
 Summary:          Fast compressor/decompresser
 Group:            Development/Libraries
 License:          ASL 2.0
@@ -10,31 +10,18 @@ URL:              http://code.google.com/p/snappy-java
 # cd snappy-java && hg archive -p snappy-java-1.0.4.1/ -X 'lib/*.jar' -t tgz ../snappy-java-1.0.4.1-CLEAN.tgz
 Source0:          snappy-java-%{version}-CLEAN.tgz
 
-Patch0:           snappy-java-%{version}-pom.patch
-
 BuildArch:        noarch
 
-BuildRequires:    felix-osgi-core
 BuildRequires:    java-devel
-BuildRequires:    jboss-logging
-BuildRequires:    jpackage-utils
 BuildRequires:    maven-local
-BuildRequires:    maven-compiler-plugin
-BuildRequires:    maven-install-plugin
-BuildRequires:    maven-jar-plugin
-BuildRequires:    maven-javadoc-plugin
-
-Requires:         felix-osgi-core
-Requires:         jboss-logging
-Requires:         jpackage-utils
+BuildRequires:    mvn(org.apache.felix:org.osgi.core)
 
 %description
 A Java port of the snappy, a fast compresser/decompresser written in C++.
 
 %package javadoc
-Summary:          Javadocs for %{name}
-Group:            Documentation
-Requires:         jpackage-utils
+Summary:          Javadoc for %{name}
+BuildArch:        noarch
 
 %description javadoc
 This package contains the API documentation for %{name}.
@@ -42,40 +29,36 @@ This package contains the API documentation for %{name}.
 %prep
 %setup -q
 
-%patch0 -p1
+%pom_remove_dep org.osgi:core
+%pom_add_dep org.apache.felix:org.osgi.core:1.4.0:provided
+%pom_xpath_remove "pom:project/pom:dependencies/pom:dependency[pom:scope = 'test' ]"
+%pom_xpath_remove "pom:build/pom:extensions"
+
+# Unwanted
+%pom_remove_plugin :maven-assembly-plugin
+%pom_remove_plugin :maven-source-plugin
+
+chmod 644 NOTICE README
+sed -i 's/\r//' LICENSE NOTICE README
 
 %build
 # no xerial package available
-mvn-rpmbuild -Dmaven.test.skip=true install javadoc:aggregate
+%mvn_build -f
 
 %install
-install -d -m 755 $RPM_BUILD_ROOT%{_javadir}
-install -d -m 755 $RPM_BUILD_ROOT%{_mavenpomdir}
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}
+%mvn_install
 
-# JAR
-install -pm 644 target/snappy-java-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/%{name}.jar
+%files -f .mfiles
+%doc LICENSE NOTICE README
 
-# POM
-install -pm 644 pom.xml $RPM_BUILD_ROOT%{_mavenpomdir}/JPP-%{name}.pom
-
-# DEPMAP
-%add_maven_depmap JPP-%{name}.pom %{name}.jar
-
-# APIDOCS
-cp -rp target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
-
-%files
-%{_mavenpomdir}/*
-%{_mavendepmapfragdir}/*
-%{_javadir}/*
-%doc LICENSE README NOTICE
-
-%files javadoc
-%{_javadocdir}/%{name}
-%doc LICENSE
+%files javadoc -f .mfiles-javadoc
+%doc LICENSE NOTICE
 
 %changelog
+* Mon Mar 31 2014 Ricardo Arguello <ricardo@fedoraproject.org> - 1.0.4.1-8
+- Switch to XMvn
+- Use pom macros
+
 * Fri Mar 28 2014 Michael Simacek <msimacek@redhat.com> - 1.0.4.1-7
 - Use Requires: java-headless rebuild (#1067528)
 
@@ -92,8 +75,8 @@ cp -rp target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}
 * Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.4.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
-* Sun Mar 4 2012 Ricardo Arguello <ricardo@fedoraproject.org> 1.0.4.1-2
+* Sun Mar 4 2012 Ricardo Arguello <ricardo@fedoraproject.org> - 1.0.4.1-2
 - Cleanup of the spec file
 
-* Tue Feb 21 2012 Marek Goldmann <mgoldman@redhat.com> 1.0.4.1-1
+* Tue Feb 21 2012 Marek Goldmann <mgoldman@redhat.com> - 1.0.4.1-1
 - Initial packaging
