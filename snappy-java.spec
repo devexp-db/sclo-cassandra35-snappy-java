@@ -1,22 +1,23 @@
 Name:             snappy-java
-Version:          1.0.4.1
-Release:          8%{?dist}
+Version:          1.0.5
+Release:          1%{?dist}
 Summary:          Fast compressor/decompresser
 Group:            Development/Libraries
 License:          ASL 2.0
 URL:              http://code.google.com/p/snappy-java
+Source0:          http://snappy-java.googlecode.com/files/snappy-java-%{version}.tar.gz
 
-# hg clone --insecure -r snappy-java-1.0.4.1 https://code.google.com/p/snappy-java/
-# cd snappy-java && hg archive -p snappy-java-1.0.4.1/ -X 'lib/*.jar' -t tgz ../snappy-java-1.0.4.1-CLEAN.tgz
-Source0:          snappy-java-%{version}-CLEAN.tgz
-
+Patch0:           snappy-java-1.0.5-build.patch
 BuildArch:        noarch
 
 BuildRequires:    java-devel
+BuildRequires:    libstdc++-static
 BuildRequires:    maven-local
 BuildRequires:    mvn(org.apache.felix:org.osgi.core)
+BuildRequires:    snappy-devel
 
 Requires:         java-headless
+Requires:         snappy
 
 %description
 A Java port of the snappy, a fast compresser/decompresser written in C++.
@@ -31,32 +32,91 @@ This package contains the API documentation for %{name}.
 %prep
 %setup -q
 
+# Cleanup
+find -name "*.class" -print -delete
+find -name "*.jar" -print -delete
+
+# Remove prebuilt libraries
+find -name "*.jnilib" -print -delete
+find -name "*.dll" -print -delete
+find -name "*.so" -print -delete
+find -name "*.h" -print -delete
+
+%patch0 -p1
+
+# Modify pom
 %pom_remove_dep org.osgi:core
 %pom_add_dep org.apache.felix:org.osgi.core:1.4.0:provided
-%pom_xpath_remove "pom:project/pom:dependencies/pom:dependency[pom:scope = 'test' ]"
+%pom_xpath_remove "pom:project/pom:dependencies/pom:dependency[pom:scope = 'test']"
 %pom_xpath_remove "pom:build/pom:extensions"
 
 # Unwanted
 %pom_remove_plugin :maven-assembly-plugin
+%pom_remove_plugin :maven-gpg-plugin
 %pom_remove_plugin :maven-source-plugin
+%pom_xpath_remove "pom:project/pom:build/pom:plugins/pom:plugin[pom:artifactId = 'maven-bundle-plugin']/pom:configuration/pom:instructions/pom:Bundle-NativeCode"
 
-chmod 644 NOTICE README
-sed -i 's/\r//' LICENSE NOTICE README
+# Build JNI library
+%pom_add_plugin org.apache.maven.plugins:maven-antrun-plugin . '
+<dependencies>
+ <dependency>
+  <groupId>com.sun</groupId>
+  <artifactId>tools</artifactId>
+  <version>1.8.0</version>
+ </dependency>
+</dependencies>
+
+<executions>
+  <execution>
+  <id>compile</id>
+  <phase>process-classes</phase>
+    <configuration>
+      <target>
+       <javac destdir="lib"
+         srcdir="src/main/java"
+         source="1.6" target="1.6" debug="on"
+         classpathref="maven.plugin.classpath">
+         <include name="**/OSInfo.java"/>
+       </javac>
+       <exec executable="make">
+        <arg line="%{?_smp_mflags}
+        JAVA_HOME=%{_jvmdir}/java
+        JAVA=%{_jvmdir}/java/bin/java
+        JAVAC=%{_jvmdir}/java/bin/javac
+        JAVAH=%{_jvmdir}/java/bin/javah"/>
+       </exec>
+      </target>
+    </configuration>
+    <goals>
+      <goal>run</goal>
+    </goals>
+  </execution>
+</executions>'
+
+chmod 644 NOTICE README.md
+sed -i 's/\r//' LICENSE NOTICE README.md
 
 %build
-# no xerial package available
+CXXFLAGS="${CXXFLAGS:-%optflags}"
+export CXXFLAGS
+
+# no xerial-core package available
 %mvn_build -f
 
 %install
 %mvn_install
 
 %files -f .mfiles
-%doc LICENSE NOTICE README
+%doc LICENSE NOTICE README.md
 
 %files javadoc -f .mfiles-javadoc
 %doc LICENSE NOTICE
 
 %changelog
+* Thu Apr 3 2014 Ricardo Arguello <ricardo@fedoraproject.org> - 1.0.5-1
+- Update to 1.0.5
+- Use the snappy package instead of a precompiled library
+
 * Mon Mar 31 2014 Ricardo Arguello <ricardo@fedoraproject.org> - 1.0.4.1-8
 - Switch to XMvn
 - Use pom macros
