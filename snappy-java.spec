@@ -1,6 +1,6 @@
 Name:             snappy-java
 Version:          1.0.5
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          Fast compressor/decompresser
 Group:            Development/Libraries
 License:          ASL 2.0
@@ -113,6 +113,9 @@ export CXXFLAGS
 %doc LICENSE NOTICE
 
 %changelog
+* Fri Jun 19 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.5-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Sun Jun 08 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.5-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
