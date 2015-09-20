@@ -1,6 +1,6 @@
 Name:             snappy-java
 Version:          1.0.5
-Release:          3%{?dist}
+Release:          4%{?dist}
 Summary:          Fast compressor/decompresser
 Group:            Development/Libraries
 License:          ASL 2.0
@@ -8,7 +8,6 @@ URL:              http://code.google.com/p/snappy-java
 Source0:          http://snappy-java.googlecode.com/files/snappy-java-%{version}.tar.gz
 
 Patch0:           snappy-java-1.0.5-build.patch
-BuildArch:        noarch
 
 BuildRequires:    java-devel
 BuildRequires:    libstdc++-static
@@ -113,6 +112,10 @@ export CXXFLAGS
 %doc LICENSE NOTICE
 
 %changelog
+* Thu Jul 23 2015 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.0.5-4
+- Build as archful package
+- Resolves: rhbz#1245629
+
 * Fri Jun 19 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.5-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
