@@ -1,21 +1,20 @@
+# empty debuginfo
+%global debug_package %nil
+
 Name:             snappy-java
 Version:          1.0.5
-Release:          4%{?dist}
+Release:          5%{?dist}
 Summary:          Fast compressor/decompresser
-Group:            Development/Libraries
 License:          ASL 2.0
-URL:              http://code.google.com/p/snappy-java
-Source0:          http://snappy-java.googlecode.com/files/snappy-java-%{version}.tar.gz
+URL:              http://xerial.org/snappy-java/
+Source0:          https://github.com/xerial/snappy-java/archive/%{version}.tar.gz
 
 Patch0:           snappy-java-1.0.5-build.patch
 
-BuildRequires:    java-devel
 BuildRequires:    libstdc++-static
 BuildRequires:    maven-local
 BuildRequires:    mvn(org.apache.felix:org.osgi.core)
 BuildRequires:    snappy-devel
-
-Requires:         java-headless
 Requires:         snappy
 
 %description
@@ -44,16 +43,15 @@ find -name "*.h" -print -delete
 %patch0 -p1
 
 # Modify pom
-%pom_remove_dep org.osgi:core
-%pom_add_dep org.apache.felix:org.osgi.core:1.4.0:provided
-%pom_xpath_remove "pom:project/pom:dependencies/pom:dependency[pom:scope = 'test']"
+%pom_change_dep org.osgi:core org.apache.felix:org.osgi.core
+%pom_xpath_remove "pom:dependency[pom:scope = 'test']"
 %pom_xpath_remove "pom:build/pom:extensions"
+%pom_xpath_remove "pom:Bundle-NativeCode"
 
 # Unwanted
 %pom_remove_plugin :maven-assembly-plugin
 %pom_remove_plugin :maven-gpg-plugin
 %pom_remove_plugin :maven-source-plugin
-%pom_xpath_remove "pom:project/pom:build/pom:plugins/pom:plugin[pom:artifactId = 'maven-bundle-plugin']/pom:configuration/pom:instructions/pom:Bundle-NativeCode"
 
 # Build JNI library
 %pom_add_plugin org.apache.maven.plugins:maven-antrun-plugin . '
@@ -106,12 +104,18 @@ export CXXFLAGS
 %mvn_install
 
 %files -f .mfiles
-%doc LICENSE NOTICE README.md
+%doc README.md
+%license LICENSE NOTICE
 
 %files javadoc -f .mfiles-javadoc
-%doc LICENSE NOTICE
+%license LICENSE NOTICE
 
 %changelog
+* Mon Sep 21 2015 gil cattaneo <puntogil@libero.it> 1.0.5-5
+- update Url and Source0 fields
+- minor changes to adapt to current guideline
+- introduce license macro
+
 * Thu Jul 23 2015 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.0.5-4
 - Build as archful package
 - Resolves: rhbz#1245629
