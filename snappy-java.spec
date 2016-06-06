@@ -2,7 +2,7 @@
 %global debug_package %nil
 
 Name:             snappy-java
-Version:          1.1.2.1
+Version:          1.1.2.4
 Release:          1%{?dist}
 Summary:          Fast compressor/decompresser
 License:          ASL 2.0
@@ -151,10 +151,13 @@ export CXXFLAGS
 %license LICENSE NOTICE
 
 %changelog
-* Wed Mar 09 2016 gil cattaneo <puntogil@libero.it> 1.1.2.1-1
+* Wed Mar 09 2016 Ricardo Arguello <ricardo@fedoraproject.org> - 1.1.2.4-1
+- Update to 1.1.2.4
+
+* Wed Mar 09 2016 gil cattaneo <puntogil@libero.it> - 1.1.2.1-1
 - Update to 1.1.2.1
 
-* Mon Sep 21 2015 gil cattaneo <puntogil@libero.it> 1.0.5-5
+* Mon Sep 21 2015 gil cattaneo <puntogil@libero.it> - 1.0.5-5
 - update Url and Source0 fields
 - minor changes to adapt to current guideline
 - introduce license macro
