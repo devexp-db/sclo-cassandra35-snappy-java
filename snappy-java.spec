@@ -2,14 +2,24 @@
 %global debug_package %nil
 
 Name:             snappy-java
-Version:          1.0.5
-Release:          6%{?dist}
+Version:          1.1.2.1
+Release:          1%{?dist}
 Summary:          Fast compressor/decompresser
 License:          ASL 2.0
 URL:              http://xerial.org/snappy-java/
 Source0:          https://github.com/xerial/snappy-java/archive/%{version}.tar.gz
-
-Patch0:           snappy-java-1.0.5-build.patch
+# Not able to build snappy-java jni library with sbt:
+# use sbt = 0.13.8 (use scala 2.11.6) available 0.13.1 (use scala 2.10.4)
+# Too many missing plugins:
+# com.etsy:sbt-checkstyle-plugin:0.4.3
+# com.github.gseitz:sbt-release:1.0.0
+# com.jsuereth:sbt-pgp:1.0.0
+# com.typesafe.sbt:sbt-osgi:0.7.0
+# de.johoop:findbugs4sbt:1.4.0
+# de.johoop:jacoco4sbt:2.1.5
+# org.xerial.sbt:sbt-sonatype:0.5.0
+Source1:          http://central.maven.org/maven2/org/xerial/snappy/%{name}/%{version}/%{name}-%{version}.pom
+Patch0:           snappy-java-1.1.2-build.patch
 
 BuildRequires:    libstdc++-static
 BuildRequires:    maven-local
@@ -29,29 +39,23 @@ This package contains the API documentation for %{name}.
 
 %prep
 %setup -q
-
 # Cleanup
 find -name "*.class" -print -delete
 find -name "*.jar" -print -delete
+rm -r ./*sbt* project
 
 # Remove prebuilt libraries
 find -name "*.jnilib" -print -delete
 find -name "*.dll" -print -delete
 find -name "*.so" -print -delete
+find -name "*.a" -print -delete
 find -name "*.h" -print -delete
 
 %patch0 -p1
 
-# Modify pom
-%pom_change_dep org.osgi:core org.apache.felix:org.osgi.core
+cp %{SOURCE1} pom.xml
+%pom_change_dep org.osgi: org.apache.felix::1.4.0
 %pom_xpath_remove "pom:dependency[pom:scope = 'test']"
-%pom_xpath_remove "pom:build/pom:extensions"
-%pom_xpath_remove "pom:Bundle-NativeCode"
-
-# Unwanted
-%pom_remove_plugin :maven-assembly-plugin
-%pom_remove_plugin :maven-gpg-plugin
-%pom_remove_plugin :maven-source-plugin
 
 # Build JNI library
 %pom_add_plugin org.apache.maven.plugins:maven-antrun-plugin . '
@@ -89,16 +93,52 @@ find -name "*.h" -print -delete
     </goals>
   </execution>
 </executions>'
+# Add OSGi support
+%pom_add_plugin org.apache.felix:maven-bundle-plugin:2.5.4 . '
+<extensions>true</extensions>
+<configuration>
+  <instructions>
+    <Bundle-Activator>org.xerial.snappy.SnappyBundleActivator</Bundle-Activator>
+    <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
+    <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+    <Bundle-Version>${project.version}</Bundle-Version>
+    <Import-Package>org.osgi.framework,*</Import-Package>
+  </instructions>
+</configuration>
+<executions>
+  <execution>
+    <id>bundle-manifest</id>
+    <phase>process-classes</phase>
+    <goals>
+      <goal>manifest</goal>
+    </goals>
+  </execution>
+</executions>'
+
+%pom_add_plugin org.apache.maven.plugins:maven-compiler-plugin:3.0 . '
+<configuration>
+ <source>1.6</source>
+ <target>1.6</target>
+</configuration>'
 
 chmod 644 NOTICE README.md
-sed -i 's/\r//' LICENSE NOTICE README.md
+# Convert from dos to unix line ending
+for file in LICENSE NOTICE README.md; do
+ sed -i.orig 's|\r||g' $file
+ touch -r $file.orig $file
+ rm $file.orig
+done
 
 %build
+
 CXXFLAGS="${CXXFLAGS:-%optflags}"
 export CXXFLAGS
-
-# no xerial-core package available
-%mvn_build -f
+# No test deps available:
+#    org.xerial.java:xerial-core:2.1
+#    org.xerial:xerial-core:3.2.3
+#    org.scalatest:scalatest_2.11:2.2.0
+#    com.novocode:junit-interface:0.10
+%mvn_build -f -- -Dproject.build.sourceEncoding=UTF-8
 
 %install
 %mvn_install
@@ -111,8 +151,8 @@ export CXXFLAGS
 %license LICENSE NOTICE
 
 %changelog
-* Fri Feb 05 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.0.5-6
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+* Wed Mar 09 2016 gil cattaneo <puntogil@libero.it> 1.1.2.1-1
+- Update to 1.1.2.1
 
 * Mon Sep 21 2015 gil cattaneo <puntogil@libero.it> 1.0.5-5
 - update Url and Source0 fields
