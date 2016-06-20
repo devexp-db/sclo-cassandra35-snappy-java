@@ -3,7 +3,7 @@
 
 Name:             snappy-java
 Version:          1.1.2.4
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          Fast compressor/decompresser
 License:          ASL 2.0
 URL:              http://xerial.org/snappy-java/
@@ -23,7 +23,9 @@ Patch0:           snappy-java-1.1.2-build.patch
 
 BuildRequires:    libstdc++-static
 BuildRequires:    maven-local
+BuildRequires:    mvn(org.apache.felix:maven-bundle-plugin)
 BuildRequires:    mvn(org.apache.felix:org.osgi.core)
+BuildRequires:    mvn(org.apache.maven.plugins:maven-antrun-plugin)
 BuildRequires:    snappy-devel
 Requires:         snappy
 
@@ -151,6 +153,9 @@ export CXXFLAGS
 %license LICENSE NOTICE
 
 %changelog
+* Mon Jun 20 2016 gil cattaneo <puntogil@libero.it> 1.1.2.4-2
+- add missing build requires
+
 * Wed Mar 09 2016 Ricardo Arguello <ricardo@fedoraproject.org> - 1.1.2.4-1
 - Update to 1.1.2.4
 
