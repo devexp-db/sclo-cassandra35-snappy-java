@@ -1,13 +1,16 @@
+%{?scl:%scl_package snappy-java}
+%{!?scl:%global pkg_name %{name}}
+
 # empty debuginfo
 %global debug_package %nil
 
-Name:             snappy-java
+Name:             %{?scl_prefix}snappy-java
 Version:          1.1.2.4
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          Fast compressor/decompresser
 License:          ASL 2.0
-URL:              http://xerial.org/snappy-java/
-Source0:          https://github.com/xerial/snappy-java/archive/%{version}.tar.gz
+URL:              http://xerial.org/%{pkg_name}/
+Source0:          https://github.com/xerial/%{pkg_name}/archive/%{version}.tar.gz
 # Not able to build snappy-java jni library with sbt:
 # use sbt = 0.13.8 (use scala 2.11.6) available 0.13.1 (use scala 2.10.4)
 # Too many missing plugins:
@@ -18,16 +21,17 @@ Source0:          https://github.com/xerial/snappy-java/archive/%{version}.tar.g
 # de.johoop:findbugs4sbt:1.4.0
 # de.johoop:jacoco4sbt:2.1.5
 # org.xerial.sbt:sbt-sonatype:0.5.0
-Source1:          http://central.maven.org/maven2/org/xerial/snappy/%{name}/%{version}/%{name}-%{version}.pom
-Patch0:           snappy-java-1.1.2-build.patch
+Source1:          http://central.maven.org/maven2/org/xerial/snappy/%{pkg_name}/%{version}/%{pkg_name}-%{version}.pom
+Patch0:           %{pkg_name}-1.1.2-build.patch
 
 BuildRequires:    libstdc++-static
-BuildRequires:    maven-local
-BuildRequires:    mvn(org.apache.felix:maven-bundle-plugin)
+BuildRequires:    %{?scl_mvn_prefix}maven-local
+BuildRequires:    %{?scl_mvn_prefix}mvn(org.apache.felix:maven-bundle-plugin)
 BuildRequires:    mvn(org.apache.felix:org.osgi.core)
-BuildRequires:    mvn(org.apache.maven.plugins:maven-antrun-plugin)
+BuildRequires:    %{?scl_mvn_prefix}mvn(org.apache.maven.plugins:maven-antrun-plugin)
 BuildRequires:    snappy-devel
 Requires:         snappy
+%{?scl:Requires: %scl_runtime}
 
 %description
 A Java port of the snappy, a fast compresser/decompresser written in C++.
@@ -40,7 +44,8 @@ BuildArch:        noarch
 This package contains the API documentation for %{name}.
 
 %prep
-%setup -q
+%{?scl_enable}
+%setup -q -n %{pkg_name}-%{version} 
 # Cleanup
 find -name "*.class" -print -delete
 find -name "*.jar" -print -delete
@@ -130,9 +135,10 @@ for file in LICENSE NOTICE README.md; do
  touch -r $file.orig $file
  rm $file.orig
 done
+%{?scl_disable}
 
 %build
-
+%{?scl_enable}
 CXXFLAGS="${CXXFLAGS:-%optflags}"
 export CXXFLAGS
 # No test deps available:
@@ -141,9 +147,12 @@ export CXXFLAGS
 #    org.scalatest:scalatest_2.11:2.2.0
 #    com.novocode:junit-interface:0.10
 %mvn_build -f -- -Dproject.build.sourceEncoding=UTF-8
+%{?scl_disable}
 
 %install
+%{?scl_enable}
 %mvn_install
+%{?scl_disable}
 
 %files -f .mfiles
 %doc README.md
@@ -153,6 +162,9 @@ export CXXFLAGS
 %license LICENSE NOTICE
 
 %changelog
+* Mon Aug 01 2016 Tomas Repik <trepik@redhat.com> - 1.1.2.4-3
+- scl conversion
+
 * Mon Jun 20 2016 gil cattaneo <puntogil@libero.it> 1.1.2.4-2
 - add missing build requires
 
