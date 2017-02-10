@@ -1,6 +1,6 @@
-diff -Nru snappy-java-1.1.2/Makefile snappy-java-1.1.2.build/Makefile
---- snappy-java-1.1.2/Makefile	2015-09-22 22:32:13.000000000 +0200
-+++ snappy-java-1.1.2.build/Makefile	2016-01-07 16:22:19.238067618 +0100
+diff -urN snappy-java-1.1.2.4/Makefile snappy-java-1.1.2.4new/Makefile
+--- snappy-java-1.1.2.4/Makefile	2016-03-31 05:49:49.000000000 +0200
++++ snappy-java-1.1.2.4new/Makefile	2017-02-09 14:10:20.877860495 +0100
 @@ -1,17 +1,15 @@
  
  include Makefile.common
@@ -132,9 +132,9 @@ diff -Nru snappy-java-1.1.2/Makefile snappy-java-1.1.2.build/Makefile
 +
  
  
-diff -Nru snappy-java-1.1.2/Makefile.common snappy-java-1.1.2.build/Makefile.common
---- snappy-java-1.1.2/Makefile.common	2015-09-22 22:32:13.000000000 +0200
-+++ snappy-java-1.1.2.build/Makefile.common	2016-01-07 16:22:19.240067503 +0100
+diff -urN snappy-java-1.1.2.4/Makefile.common snappy-java-1.1.2.4new/Makefile.common
+--- snappy-java-1.1.2.4/Makefile.common	2016-03-31 05:49:49.000000000 +0200
++++ snappy-java-1.1.2.4new/Makefile.common	2017-02-09 15:22:23.113263547 +0100
 @@ -42,8 +42,14 @@
  
  # os=Default is meant to be generic unix/linux
@@ -322,15 +322,15 @@ diff -Nru snappy-java-1.1.2/Makefile.common snappy-java-1.1.2.build/Makefile.com
 +Linux_CXX          := g++
 +Linux_STRIP        := strip
 +Linux_CXXFLAGS     := -I$(JAVA_HOME)/include $(CXXFLAGS) -fPIC -fvisibility=hidden
-+Linux_LINKFLAGS    := -shared -static-libgcc -static-libstdc++ 
++Linux_LINKFLAGS    := -shared -lsnappy
 +Linux_LIBNAME      := libsnappyjava.so
 +Linux_SNAPPY_FLAGS :=
  
  CXX        := $($(os_arch)_CXX)
  STRIP     := $($(os_arch)_STRIP)
-diff -Nru snappy-java-1.1.2/Makefile.package snappy-java-1.1.2.build/Makefile.package
---- snappy-java-1.1.2/Makefile.package	2015-09-22 22:32:13.000000000 +0200
-+++ snappy-java-1.1.2.build/Makefile.package	2016-01-07 16:22:19.242067387 +0100
+diff -urN snappy-java-1.1.2.4/Makefile.package snappy-java-1.1.2.4new/Makefile.package
+--- snappy-java-1.1.2.4/Makefile.package	2016-03-31 05:49:49.000000000 +0200
++++ snappy-java-1.1.2.4new/Makefile.package	2017-02-09 14:06:21.864949548 +0100
 @@ -77,6 +77,6 @@
  	ssh $(AMD_SERVER) "source .zprofile && cd $(WORK) && $(TEST_CMD)"
  

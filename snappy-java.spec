@@ -4,13 +4,13 @@
 # empty debuginfo
 %global debug_package %nil
 
-Name:             %{?scl_prefix}snappy-java
-Version:          1.1.2.4
-Release:          3%{?dist}
-Summary:          Fast compressor/decompresser
-License:          ASL 2.0
-URL:              http://xerial.org/%{pkg_name}/
-Source0:          https://github.com/xerial/%{pkg_name}/archive/%{version}.tar.gz
+Name:		%{?scl_prefix}snappy-java
+Version:	1.1.2.4
+Release:	4%{?dist}
+Summary:	Fast compressor/decompresser
+License:	ASL 2.0
+URL:		http://xerial.org/%{pkg_name}/
+Source0:	https://github.com/xerial/%{pkg_name}/archive/%{version}.tar.gz
 # Not able to build snappy-java jni library with sbt:
 # use sbt = 0.13.8 (use scala 2.11.6) available 0.13.1 (use scala 2.10.4)
 # Too many missing plugins:
@@ -21,30 +21,28 @@ Source0:          https://github.com/xerial/%{pkg_name}/archive/%{version}.tar.g
 # de.johoop:findbugs4sbt:1.4.0
 # de.johoop:jacoco4sbt:2.1.5
 # org.xerial.sbt:sbt-sonatype:0.5.0
-Source1:          http://central.maven.org/maven2/org/xerial/snappy/%{pkg_name}/%{version}/%{pkg_name}-%{version}.pom
-Patch0:           %{pkg_name}-1.1.2-build.patch
+Source1:	http://central.maven.org/maven2/org/xerial/snappy/%{pkg_name}/%{version}/%{pkg_name}-%{version}.pom
+Patch0:		%{pkg_name}-1.1.2-build.patch
 
-BuildRequires:    libstdc++-static
-BuildRequires:    %{?scl_mvn_prefix}maven-local
-BuildRequires:    %{?scl_mvn_prefix}mvn(org.apache.felix:maven-bundle-plugin)
-BuildRequires:    mvn(org.apache.felix:org.osgi.core)
-BuildRequires:    %{?scl_mvn_prefix}mvn(org.apache.maven.plugins:maven-antrun-plugin)
-BuildRequires:    snappy-devel
-Requires:         snappy
+BuildRequires:	%{?scl_prefix_maven}maven-local
+BuildRequires:	%{?scl_prefix_maven}maven-plugin-bundle
+BuildRequires:	%{?scl_prefix_maven}felix-osgi-core
+BuildRequires:	%{?scl_prefix_maven}maven-antrun-plugin
+BuildRequires:	snappy-devel
+Requires:	snappy
 %{?scl:Requires: %scl_runtime}
 
 %description
 A Java port of the snappy, a fast compresser/decompresser written in C++.
 
 %package javadoc
-Summary:          Javadoc for %{name}
-BuildArch:        noarch
+Summary:	Javadoc for %{name}
+BuildArch:	noarch
 
 %description javadoc
 This package contains the API documentation for %{name}.
 
 %prep
-%{?scl_enable}
 %setup -q -n %{pkg_name}-%{version} 
 # Cleanup
 find -name "*.class" -print -delete
@@ -61,6 +59,7 @@ find -name "*.h" -print -delete
 %patch0 -p1
 
 cp %{SOURCE1} pom.xml
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 %pom_change_dep org.osgi: org.apache.felix::1.4.0
 %pom_xpath_remove "pom:dependency[pom:scope = 'test']"
 
@@ -100,6 +99,7 @@ cp %{SOURCE1} pom.xml
     </goals>
   </execution>
 </executions>'
+
 # Add OSGi support
 %pom_add_plugin org.apache.felix:maven-bundle-plugin:2.5.4 . '
 <extensions>true</extensions>
@@ -127,6 +127,7 @@ cp %{SOURCE1} pom.xml
  <source>1.6</source>
  <target>1.6</target>
 </configuration>'
+%{?scl:EOF}
 
 chmod 644 NOTICE README.md
 # Convert from dos to unix line ending
@@ -135,24 +136,23 @@ for file in LICENSE NOTICE README.md; do
  touch -r $file.orig $file
  rm $file.orig
 done
-%{?scl_disable}
 
 %build
-%{?scl_enable}
 CXXFLAGS="${CXXFLAGS:-%optflags}"
 export CXXFLAGS
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 # No test deps available:
 #    org.xerial.java:xerial-core:2.1
 #    org.xerial:xerial-core:3.2.3
 #    org.scalatest:scalatest_2.11:2.2.0
 #    com.novocode:junit-interface:0.10
 %mvn_build -f -- -Dproject.build.sourceEncoding=UTF-8
-%{?scl_disable}
+%{?scl:EOF}
 
 %install
-%{?scl_enable}
+%{?scl:scl enable %{scl_maven} %{scl} - << "EOF"}
 %mvn_install
-%{?scl_disable}
+%{?scl:EOF}
 
 %files -f .mfiles
 %doc README.md
@@ -162,8 +162,11 @@ export CXXFLAGS
 %license LICENSE NOTICE
 
 %changelog
-* Mon Aug 01 2016 Tomas Repik <trepik@redhat.com> - 1.1.2.4-3
-- scl conversion
+* Fri Feb 10 2017 Tomas Repik <trepik@redhat.com> - 1.1.2.4-4
+- create a scl package
+
+* Thu Feb 09 2017 Tomas Repik <trepik@redhat.com> - 1.1.2.4-3
+- link correctly against libsnappy.so
 
 * Mon Jun 20 2016 gil cattaneo <puntogil@libero.it> 1.1.2.4-2
 - add missing build requires
