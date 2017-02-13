@@ -6,7 +6,7 @@
 
 Name:		%{?scl_prefix}snappy-java
 Version:	1.1.2.4
-Release:	4%{?dist}
+Release:	5%{?dist}
 Summary:	Fast compressor/decompresser
 License:	ASL 2.0
 URL:		http://xerial.org/%{pkg_name}/
@@ -85,7 +85,7 @@ cp %{SOURCE1} pom.xml
          classpathref="maven.plugin.classpath">
          <include name="**/OSInfo.java"/>
        </javac>
-       <exec executable="make">
+       <exec executable="make" failonerror="true">
         <arg line="%{?_smp_mflags}
         JAVA_HOME=%{_jvmdir}/java
         JAVA=%{_jvmdir}/java/bin/java
@@ -162,11 +162,14 @@ export CXXFLAGS
 %license LICENSE NOTICE
 
 %changelog
-* Fri Feb 10 2017 Tomas Repik <trepik@redhat.com> - 1.1.2.4-4
+* Mon Feb 13 2017 Tomas Repik <trepik@redhat.com> - 1.1.2.4-5
 - create a scl package
 
-* Thu Feb 09 2017 Tomas Repik <trepik@redhat.com> - 1.1.2.4-3
-- link correctly against libsnappy.so
+* Fri Feb 10 2017 Pavel Raiskup <praiskup@redhat.com> - 1.1.2.4-4
+- fail the build if the nested 'make' fails (rhbz#1421088)
+
+* Thu Feb 09 2017 gil cattaneo <puntogil@libero.it> 1.1.2.4-3
+- fix for rhbz#1420790 (link correctly against libsnappy.so)
 
 * Mon Jun 20 2016 gil cattaneo <puntogil@libero.it> 1.1.2.4-2
 - add missing build requires
