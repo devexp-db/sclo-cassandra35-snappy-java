@@ -5,8 +5,8 @@
 %global debug_package %nil
 
 Name:		%{?scl_prefix}snappy-java
-Version:	1.1.2.4
-Release:	5%{?dist}
+Version:	1.1.2.6
+Release:	1%{?dist}
 Summary:	Fast compressor/decompresser
 License:	ASL 2.0
 URL:		http://xerial.org/%{pkg_name}/
@@ -24,11 +24,14 @@ Source0:	https://github.com/xerial/%{pkg_name}/archive/%{version}.tar.gz
 Source1:	http://central.maven.org/maven2/org/xerial/snappy/%{pkg_name}/%{version}/%{pkg_name}-%{version}.pom
 Patch0:		%{pkg_name}-1.1.2-build.patch
 
+BuildRequires:	make
+BuildRequires:	gcc-c++
+BuildRequires:	snappy-devel
+BuildRequires:	%{?scl_prefix_java_common}javapackages-tools
 BuildRequires:	%{?scl_prefix_maven}maven-local
 BuildRequires:	%{?scl_prefix_maven}maven-plugin-bundle
 BuildRequires:	%{?scl_prefix_maven}felix-osgi-core
 BuildRequires:	%{?scl_prefix_maven}maven-antrun-plugin
-BuildRequires:	snappy-devel
 Requires:	snappy
 %{?scl:Requires: %scl_runtime}
 
@@ -86,11 +89,7 @@ cp %{SOURCE1} pom.xml
          <include name="**/OSInfo.java"/>
        </javac>
        <exec executable="make" failonerror="true">
-        <arg line="%{?_smp_mflags}
-        JAVA_HOME=%{_jvmdir}/java
-        JAVA=%{_jvmdir}/java/bin/java
-        JAVAC=%{_jvmdir}/java/bin/javac
-        JAVAH=%{_jvmdir}/java/bin/javah"/>
+        <arg line="%{?_smp_mflags}"/>
        </exec>
       </target>
     </configuration>
@@ -162,6 +161,13 @@ export CXXFLAGS
 %license LICENSE NOTICE
 
 %changelog
+* Mon Feb 13 2017 Tomas Repik <trepik@redhat.com> - 1.1.2.6-1
+- version update
+
+* Mon Feb 13 2017 Michael Simacek <msimacek@redhat.com> - 1.1.2.4-6
+- Let the tooling find the JVM
+- Add BR on make and g++
+
 * Mon Feb 13 2017 Tomas Repik <trepik@redhat.com> - 1.1.2.4-5
 - create a scl package
 
